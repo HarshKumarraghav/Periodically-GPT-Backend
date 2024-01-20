@@ -1,17 +1,18 @@
-import require$$0 from 'path';
-import require$$0$1 from 'tty';
-import require$$1 from 'util';
-import require$$1$1 from 'fs';
-import require$$4$1 from 'net';
-import require$$0$2 from 'events';
-import require$$1$2 from 'stream';
-import require$$3 from 'zlib';
 import require$$0$3 from 'buffer';
-import require$$1$3 from 'string_decoder';
-import require$$8 from 'querystring';
-import require$$0$4 from 'url';
-import require$$0$5 from 'http';
 import require$$0$6 from 'crypto';
+import require$$0$2 from 'events';
+import require$$1$1 from 'fs';
+import require$$0$5 from 'http';
+import require$$4$1 from 'net';
+import { OpenAI } from 'openai';
+import require$$0 from 'path';
+import require$$8 from 'querystring';
+import require$$1$2 from 'stream';
+import require$$1$3 from 'string_decoder';
+import require$$0$1 from 'tty';
+import require$$0$4 from 'url';
+import require$$1 from 'util';
+import require$$3 from 'zlib';
 
 var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
@@ -42827,12 +42828,62 @@ var express = expressExports;
 
 const express$1 = /*@__PURE__*/getDefaultExportFromCjs(express);
 
+const openai = new OpenAI({
+  apiKey: "" ""
+});
+
 function welcome(req, res) {
   return res.json({ message: "Welcome to bezkoder application." });
 }
 const app = express$1();
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 8080;
 app.get("/", welcome);
+const SendMessageHandler = async (req, res) => {
+  try {
+    const body = req.body;
+    console.log(body);
+    const userId = process.env.USER_ID || "user_2W84NAgbyRlQMaMN7c1sq0IV3yr";
+    if (!userId)
+      return res.status(401).send("Unauthorized");
+    const fileId = "clrmgydhc0001i8081ztqm3fz";
+    const message = "Hydrogren atomic number";
+    if (!fileId)
+      ;
+    const response = await openai.chat.completions.create({
+      model: "gpt-3.5-turbo",
+      temperature: 1,
+      messages: [
+        {
+          role: "system",
+          content: "You the chatbot for periodic table only give response about periodic table related stuff you are not allowed to give response outside the periodic table. \nIf you don't know the answer, just say that you don't know, don't try to make up an answer. Use the following pieces of context (or previous conversaton if needed) to answer the users question in markdown format."
+        },
+        {
+          role: "user",
+          content: `You the chatbot for periodic table only give response about periodic table related stuff you are not allowed to give response outside the periodic table. 
+If you don't know the answer, just say that you don't know, don't try to make up an answer. Use the following pieces of context (or previous conversaton if needed) to answer the users question in markdown format. 
+If you don't know the answer, just say that you don't know, don't try to make up an answer.
+              
+  
+        
+----------------
+
+        
+        CONTEXT:
+        You the chatbot for periodic table only give response about periodic table related stuff you are not allowed to give response outside the periodic table. 
+If you don't know the answer, just say that you don't know, don't try to make up an answer.
+              
+        
+        USER INPUT: ${message}`
+        }
+      ]
+    });
+    return res.json({ data: response });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).send("Internal Server Error");
+  }
+};
+app.post("/api/message", SendMessageHandler);
 app.listen(PORT, "localhost", function() {
   console.log(`Server is running on port ${PORT}.`);
 }).on("error", (err) => {
